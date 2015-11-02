@@ -1,0 +1,13 @@
+typical process:
+	1. import/clean
+	2. single-var expl: def vars, expl distribution, det appr sum stats
+	3. pair-wise expl: id rel btwn vars via tables, scat plt, correlation, linear fits
+	4. multivariate analysis: if apparent rel, multiple regression to control vars, expl rels
+	5. est & hypothesis testing: 
+		how big is effect?
+		how much variability if test run again?
+		possible effect is due to chance?
+	6. viz: discover trends; if sig, also share them
+
+ 
+
