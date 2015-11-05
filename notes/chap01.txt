@@ -1,0 +1,167 @@
+weaknesses of anecdotal evidence:
+	sample size
+	selection bias
+	confirmation bias
+	inaccuracy 
+
+counteract via:
+	data collection
+	descriptive statistics: sum data concisely, eval viz options
+	eda: seek patterns, difs, other ways ? addressed; id inconsistencies, limits
+	estimation
+	hypothesis testing
+
+cross-sectional: one group at point in time
+longitudinal: one group over time
+cycle: repeated administration of same survey
+population: everyone
+sample: some of everyone
+respondents: survey participants
+representative: everyone has equal chance of participating
+oversample: survey @ rates higher th in population for purpose of drawing stat sig conclusions abt oversampled pop at cost of losing gen conclusions due to oversampling of composite groups
+codebook: design of survey
+
+2002FemPreg.dat.gz: "gzip-compressed data file in plain text"
+2002FemPreg.dct: "Stata dictionary file", list of variable names, types & indicies for where in line to find var
+
+thinkstats2.py: python module containing classes/functions, including functions to read Stata dict and dat files
+
+def ReadFemPreg(dct_file='2002FemPreg.dct',
+				dat_file='2002FemPreg.dat.gz'): # define dictionary and data files
+	dct = thinkstats2.ReadStataDct(dct_file) # load dictionary
+	df = dct.ReadFixedWidth(dat_file, compression='gzip') # unpack data into dct
+	CleanFemPreg(df) 
+	return df # return dataframe
+
+dataframe: fundamental data structure of pandas (python data/statistics package)
+	contains:
+		row for each record
+		column for each variable
+		variable names/types
+		methods for accessing/modifying data
+
+		>>> df
+		
+			 printing returns truncated table + shape (dimensions)
+
+		>>> df.columns
+		Index[u'col1', u'col2', ...]
+
+			more on Index tk, think of for now as list
+
+		>>> df.columns[1]
+		'col2'
+		>>> col2 = df['col2']
+		>>> type(col2)
+		<class 'pandas.core.series.Series'>
+
+			a Series is essentially a list w more features 
+			printing returns truncated view of indicies and values, plus name, length & data type
+
+		>>> col2
+		0  data
+		1  data
+		2  data
+		3  data
+		...
+		98  data
+		99  data
+		100  data
+		Name: col2, Length: 100, dtype: <dtype>
+
+			accessible via index, col2[0], and slices, col2[6:9], (result of slice is another Series)
+
+		>>> df.col2 
+
+			also works assuming column name is valid python identifier (begin w letter, no spaces, etc.)
+
+variables
+	in use for book:
+		caseid: int id of resp
+		prglngth: int dur of preg
+		outcome: int code for outcome, 1 is live birth
+		pregordr: int which preg (serial)
+		birthord: int which live birth (serial)
+		birthwgt_lb, birthwgt_oz: birthweight in lbs, oz
+		agepreg: mom's age, end of preg
+		finalwgt: float value indicating # of people in pop respondent represents
+
+	raw data: obtained by survey
+	recodes: calculated from raw data, i.e.
+		if wksgest:
+			prglngth = wksgest
+		else:
+			prglngth = mosgest * 4.33 # avg number of wks/mo
+	"in general it is a good idea to use recodes when they are available, unless there is a compelling reason to process the raw data yourself"
+
+transformations
+	data cleaning: check for errors, deal with special values, convert to diff formats, perform calculations
+
+	def CleanFemPreg(df):
+		df.agepreg =/ 100.0 # encoded as int val in centiyears; divide by 100 to yield val in years
+
+		na_vals = [97, 98, 99] # codes for n/a
+		df.birthwgt_lb.replace(na_vals, np.nan, inplace=True) # np.nan = float representing "not a number"
+		# any formula containing np.nan will yield np.nan
+		df.birthwgt_oz.replace(na_vals, np.nan, inplace=True) # inplace means mod existing Series, don't create new
+
+		# create new column containing total weight in pounds (oz/16 --> float fraction of pound)
+		df['totalwgt_lb'] = df.birthwgt_lb + df.birthwgt_oz / 16.0
+
+			must use dict notation to add column, dot only adds attr
+
+
+validation
+	export/import, unfamiliarity w set can introduce errors
+	GET TO KNOW YOUR DATA, OK??
+
+	compare w published summary results
+
+		>>> df.outcome.value_counts().sort_index()
+
+	value_counts() yields series, sort_index() orders result by index
+
+		>>> df.outcome.value_count().sort_index()
+
+		...
+		51  1
+
+			meaning 51 lb baby
+			add to cleaning function:
+
+				df.birthwgt_lb[df.birthwgt_lb > 20] = np.nan
+
+interpretation
+	statistics, context
+
+	def MakePregMap(df):
+		d = defaultdict(list)
+		for index, caseid in df.caseid.iteritems(): 
+			d[caseid].append(index) # creates dict with caseid as key, list of indicies (row numbers) of associated pregnancy records as value
+		return d
+
+		defaultdict in collections module (http://bit.ly/1WrT928):
+			d = defaultdict(list)
+			for key, value in list.items():
+				d[key].append(value)
+
+			iterates over list, entering each unique key as a key in d and outcomes as values in list tied to key
+
+			>>> s = [('yellow', 1), ('blue', 2), ('yellow', 3), ('blue', 4), ('red', 1)]
+			>>> d = defaultdict(list)
+			>>> for k, v in s:
+			...     d[k].append(v)
+			...
+			>>> d.items()
+			[('blue', [2, 4]), ('red', [1]), ('yellow', [1, 3])]
+
+	>>> caseid = 10229 
+	>>> preg_map = MakePregMap(df) # run above function to return list [(caseid, [row, numbers, of, records]), ...]
+	>>> indicies = preg_map[caseid] # return row numbers for indicated caseid
+	>>> df.outcome[indicies].values # return outcome values for indicated rows
+	[4 4 4 4 4 4 1] # .values --> NumPy array, sans .values, would return Series of outcomes
+
+		4 is miscarriage, 1 is livebirth
+
+
+

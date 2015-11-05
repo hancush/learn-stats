@@ -1,0 +1,105 @@
+distribution: report of values, how many times they appear in dataset
+histogram: common rep of distribution, shows frequency, or # times value appears 
+
+	t = [sequence, of, values]
+
+dictionaries useful in computing frequency:
+
+	hist = {}
+	for x in t:
+		hist[x] = hist.get(x, 0) + 1
+		# adds one to frequency of given key (overwrites existing k/v pair); if none, creates new item in dict with x as key, 0 + 1 as value
+	# .get() returns value for given key
+	# if no value, return None by default
+	# can set return value for None as follows:
+		dict.get(key, DesiredValue)
+
+alternately, use Counter in Collections module (http://bit.ly/1MwHpjO):
+
+	from collections import Counter
+	counter = Counter(t)
+	# yields Counter object
+
+	counter.most_common(n) # return n most common values, and their frequencies
+	set(counter), dict(counter) # convert to set, dictionary
+
+	counter = Counter(a=3, b=3, c=6, ...)
+	list(counter.elements()) # create list with given counts of given elements
+	[a, a, a, b, b, b, c, c, c, c, c, c, ...]
+
+or use df.value_counts() as in previous exercise
+
+[skipping section on author's Hist class in favor of matplotlib]
+
+mode: most common value
+normal/Gaussian distribution: bell curve
+tail: weighted higher or lower than normal distribution
+uniform: all values have same frequency
+
+	good example of context:
+	"Figure 2.2 shows the histogram of birthwgt_oz, which is the ounces part of
+	birth weight. In theory we expect this distribution to be uniform; that is, all
+	values should have the same frequency. In fact, 0 is more common than the
+	other values, and 1 and 15 are less common, probably because respondents
+	round off birth weights that are close to an integer value."
+
+histograms help identfy common values, but rare ones (outliers) can slip through the cracks
+good idea to find min/max of series
+
+	in pandas (more on Series methods here: http://bit.ly/1MwLIM0):
+
+	Series.nsmallest(n)
+	Series.nlargest(n) 
+	# where n in number of values
+
+handling outliers, i.e. should you get rid of them, depends on "domain knowledge", or info about data provenance/definition
+
+histogram is complete description of distribution of sample
+to summarize, describe:
+	central tendency: are values clustered around a particular point?
+	modes: more than one cluster?
+	spread: how much variability?
+	tails: how quickly do probabilities drop off? 
+	outliers: any extreme values from modes?
+
+summary statistics
+	mean: "central tendency," equal to sum of all values divided by number of values
+		"mean" unique to sample, "average" generalizable
+	variance: variability, or spread (not a great summary statistic)
+	standard deviation: square root of variance
+
+	in pandas:
+
+		Series.mean()
+		Series.var()
+		Series.std()
+
+	effect size: size of effect, r
+		Cohen's d (http://wp.me/PA5h3-2g) compares difference between groups to variability within groups, or "mean difference between two groups in standard deviation units"
+
+		.8 is large
+		.5 is moderate
+		.2 is small
+
+		def CohenEffectSize(group1, group2):
+			diff = group1.mean() - group2.mean() # difference in means of group 1 and group 2
+
+			var1 = group1.var() # variability of group 1
+			var2 = group2.var() # '' of group 2
+			n1, n2 = len(group1), len(group2) # sample size of groups 1 and 2
+
+			# pooled variability is equal to sample size of group 1 times variability of group 1, plus sample size of group 2 times variability of group 2, all over combined sample size of groups 1 and 2
+			pooled_var = (n1 * var1 + n2 * var2) / (n1 + n2)
+			# d is equal to the difference in means of group 1 and group 2 over the square root of their pooled variability
+			d = diff / math.sqrt(pooled_var)
+			return d
+
+			# "the mean difference between group 1 and group 2 is d standard deviations" 
+
+reporting results
+	depends on:
+		audience
+		goals
+		ethics
+
+	clinically significant: practically relevant result

@@ -1,7 +1,7 @@
 ## progress
 * intro [✓]
 * preface [✓]
-* chap 1: exploratory data analysis [ ]
+* chap 1: exploratory data analysis [✓]
 * chap 2: distributions [ ]
 * chap 3: probability mass functions [ ]
 * chap 4: cumulative distribution functions [ ]
