@@ -1,0 +1,26 @@
+probability mass function: alterative representation of distribution that pairs each value in the set to its probability of occurring
+
+for a series, s:
+
+	pmf = s.value_counts().sort_index() / len(s)
+
+probability: frequency expressed as a fraction of sample size
+normalization: get from frequency to probability by dividing by sample 
+
+to plot:
+	
+	pmf.plot(kind='bar')
+
+pmf[value] returns probability of value within pmf
+
+once you identify trends, focus visualization on modal (most common) values, i.e. differences in probabilites of various lengths of maternity leave between women in the highest income bracket, slice1, versus all others, slice2
+
+	area_of_interest = range(mode_lower, mode_upper)
+	diffs = []
+	for value in area_of_interest:
+		p1 = slice1[value]
+		p2 = slice2[value]
+		diff = p1 - p2
+		diffs.append(diff)
+
+	diffs.plot(kind='bar')
